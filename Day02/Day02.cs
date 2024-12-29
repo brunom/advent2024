@@ -12,55 +12,78 @@ namespace Day02
             var q =
                 from line in File.ReadLines("input.txt")
                 let levels = line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => int.Parse(s)).ToList()
-                where new[] { -1, 1 }.Any(mul =>
-                    levels.Zip(levels.Skip(1)).All(p => 1 <= mul * (p.First - p.Second) && mul * (p.First - p.Second) <= 3))
+                where Increasing(levels) || Increasing(levels.AsEnumerable().Reverse().ToList())
                 select levels;
 
             Assert.Equal(218, q.Count());
         }
-        struct Dampener
+        static bool Increasing(int level0, int level1) => 1 <= level1 - level0 && level1 - level0 <= 3;
+        static bool Increasing(List<int> levels, int i = 0)
         {
-            int value0;
-            int value1;
-            int valueCount;
-            public int Removed { get; private set; }
-            public void OnNext(int value)
+            for (; i < levels.Count - 1; ++i)
             {
-                if (valueCount == 0)
+                if (!Increasing(levels[i], levels[i + 1]))
+                    return false;
+            }
+            return true;
+        }
+        static bool IncreasingBut(List<int> levels)
+        {
+            // TODO IEnumerable parameter
+            if (levels.Count < 3) return true;
+            int i = 0;
+            int level0 = levels[i++];
+            int level1 = levels[i++];
+            int level2 = levels[i++];
+            bool inc01 = Increasing(level0, level1);
+            bool inc12 = Increasing(level1, level2);
+            if (!inc01)
+            {
+                return (inc12 || Increasing(level0, level2)) && Increasing(levels, i - 1);
+            }
+            while (true)
+            {
+                if (i == levels.Count) return true;
+                int level3 = levels[i++];
+                bool inc23 = Increasing(level2, level3);
+                if (inc12)
                 {
-                    value1 = value;
-                    valueCount = 1;
+                    level0 = level1;
+                    level1 = level2;
+                    level2 = level3;
+                    inc01 = inc12;
+                    inc12 = inc23;
                 }
                 else
                 {
-                    //value1 - value
+                    return (Increasing(level1, level3) || Increasing(level0, level2) && inc23) && Increasing(levels, i - 1);
                 }
-                throw new NotImplementedException();
             }
         }
         [Fact]
-        unsafe public void Test2()
+        public void Test2()
         {
-            using var mmf = MemoryMappedFile.CreateFromFile("input.txt");
-            using var view = mmf.CreateViewAccessor();
-            byte* pointer = null;
-            view.SafeMemoryMappedViewHandle.AcquirePointer(ref pointer);
-            ReadOnlySpan<byte> file = new(pointer, (int)view.SafeMemoryMappedViewHandle.ByteLength);
             int count = 0;
-            foreach (var rFile in file.Split((byte)'\n'))
+            foreach (var line in File.ReadLines("input.txt"))
             {
-                var line = file[rFile];
-                Dampener inc = new();
-                Dampener dec = new();
-                foreach (var rLine in line.Split((byte)' '))
-                {
-                    int level = int.Parse(line[rLine]);
-                    inc.OnNext(+level);
-                    dec.OnNext(-level);
-                }
-                if (inc.Removed <= 1 || dec.Removed <= 1)
-                    ++count;
+                var levelsA =
+                    line
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => int.Parse(s))
+                    .ToList();
+                var levelsB =
+                    levelsA
+                    .AsEnumerable()
+                    .Reverse()
+                    .ToList();
+                if (IncreasingBut(levelsA))
+                    count++;
+                else if (IncreasingBut(levelsB))
+                    count++;
+                else
+                    "".ToString();
             }
+            Assert.Equal(290, count);
         }
     }
 }
