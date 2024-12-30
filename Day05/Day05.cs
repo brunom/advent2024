@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
+using System.Text;
 
 namespace Day05
 {
@@ -17,7 +19,7 @@ namespace Day05
 
             var iEmptyLine = file.IndexOf([(byte)'\n', (byte)'\n']);
             var rules = file[..iEmptyLine]; // Don't include final eol
-            var updates = file[(2 + iEmptyLine)..(file.Length-1)];
+            var updates = file[(2 + iEmptyLine)..(file.Length - 1)];
             int sum = 0;
             foreach (var rupdates in updates.Split((byte)'\n'))
             {
@@ -33,10 +35,45 @@ namespace Day05
                     if (ifst != -1 && isnd != -1 && isnd < ifst)
                         goto unordered;
                 }
-                sum += int.Parse(update[(update.Length / 2-1)..(update.Length / 2+1)]);
+                sum += int.Parse(update[(update.Length / 2 - 1)..(update.Length / 2 + 1)]);
             unordered: { }
             }
             Assert.Equal(5991, sum);
+        }
+        [Fact]
+        public unsafe void Test2()
+        {
+            var rules =
+                File.ReadLines("input.txt")
+                .TakeWhile(line => !string.IsNullOrWhiteSpace(line))
+                .Select(line => (int.Parse(line.Split('|')[0]), int.Parse(line.Split('|')[1])))
+                .ToImmutableList();
+            var updates =
+                File.ReadLines("input.txt")
+                .SkipWhile(line => !string.IsNullOrWhiteSpace(line))
+                .Skip(1)
+                .Select(line => line.Split(',').Select(p => int.Parse(p)).ToList())
+                .ToImmutableList();
+            int sum = 0;
+            foreach (var update in updates)
+            {
+                List<int> ordered = new();
+                while (ordered.Count < update.Count)
+                {
+                    int next =
+                        update
+                        .Except(ordered)
+                        .Where(p => rules.All(r => r.Item2 != p || ordered.Contains(r.Item1) || !update.Contains(r.Item1)))
+                        .Single();
+                    ordered.Add(next);
+                }
+                if (!ordered.SequenceEqual(update))
+                {
+                    sum += ordered[ordered.Count / 2];
+                }
+            }
+            Assert.Equal(5479, sum);
+
         }
     }
 }
