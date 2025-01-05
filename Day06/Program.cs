@@ -1,7 +1,7 @@
-﻿string input = File.ReadAllText("input.txt");// berni es el mejor
-int filas = 130;
-int columnas = 130;
-SortedSet<(int fila, int columna)> obstaculos = new();
+﻿string input = File.ReadAllText("input.txt");// BERNI ES EL MEJOR
+int filas = 130;//definicion FILAS
+int columnas = 130;// definicion COLUMNAS
+SortedSet<(int fila, int columna)> obstaculos = new(); // definicion OBSTACULO
 (int fila, int columna) posicion = (0,0);
 Direccion direccion = Direccion.Arriba; // siempre empieza mirando para arriba
 for (int fila = 0; fila < filas; fila = fila + 1)
@@ -13,7 +13,7 @@ for (int fila = 0; fila < filas; fila = fila + 1)
         {
             obstaculos.Add((fila, columna));
         }
-        if (actual == '^')
+        if (actual == '^') // "JUGADOR" principio
         {
             posicion = (fila, columna);
         }
@@ -24,13 +24,13 @@ for (int fila = 0; fila < filas; fila = fila + 1)
 
 SortedSet<(int fila, int columna)> ruta = [posicion];
 
-for (int pasos = 0; pasos < 99999; pasos++)
+for (int pasos = 0; pasos < 16900; pasos++)// cantidad de "movimientos" del guardia
 {
     //for (int fila = 0; fila < filas; fila = fila + 1)
     //{
     //    for (int columna = 0; columna < columnas; columna = columna + 1)
     //    {
-    //        if (posicion == (fila, columna))
+    //        if (posicion == (fila, columna))// cambiar "SKIN" / dibujar movimientos
     //        {
     //            if (direccion == Direccion.Arriba)
     //            {
@@ -51,7 +51,7 @@ for (int pasos = 0; pasos < 99999; pasos++)
     //        }
     //        else if (obstaculos.Contains((fila, columna)))
     //        {
-    //            Console.Write('#');
+    //            Console.Write('#');// obstaculos
     //        }
     //        else
     //        {
@@ -60,7 +60,7 @@ for (int pasos = 0; pasos < 99999; pasos++)
     //    }
     //    Console.WriteLine();
     //}
-    Console.WriteLine(ruta.Count);
+    Console.WriteLine(ruta.Count);// contar espacios RUTA
     //foreach (var p in ruta)
     //{
     //    Console.Write(p.ToString());
@@ -109,7 +109,7 @@ for (int pasos = 0; pasos < 99999; pasos++)
     }
     else
     {
-        posicion = proxima_posicion;
+        posicion = proxima_posicion;// salir del mapa
 
         if (posicion.fila == -1)
             break;
@@ -122,7 +122,7 @@ for (int pasos = 0; pasos < 99999; pasos++)
 
         ruta.Add(posicion);
     }
-}
+} 
 
 enum Direccion
 {
